@@ -1,0 +1,229 @@
+\documentclass{article}
+
+%设置页边距
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{lmodern}
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage {indentfirst}
+\usetikzlibrary{arrows,positioning}
+
+\geometry{left=2cm,right=2cm,top=2cm,bottom=2cm}
+
+%插入代码
+\usepackage{titlesec}
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{
+    numbers=left,
+    numberstyle=\scriptsize,
+    keywordstyle=\color{red!80},
+    commentstyle=\color{red!50!green!50!blue!50}\bf,
+    frame=trbl,
+    rulesepcolor=\color{red!20!green!20!blue!20},
+    backgroundcolor=\color[RGB]{245,245,244},
+    escapeinside=``,
+    showstringspaces=false,
+    xleftmargin=5em,xrightmargin=5em,
+    aboveskip=1em,
+    framexleftmargin=2em,
+}
+%\begin{lstlisting}[language=C++]
+%\end{lstlisting}
+%设置中文
+\usepackage{ctex}
+\usepackage{algorithm}  
+\usepackage{algorithmicx}
+%\usepackage{algorithm2e}
+\usepackage{algpseudocode}  
+\usepackage{amsmath}  
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}  % Use Input in the format of Algorithm  
+\renewcommand{\algorithmicensure}{\textbf{Output:}} % Use Output in the format of Algorithm  
+\begin{document}
+%\begin{CJK*}{UTF8}{gbsn}
+\title{Algorithm Design and Analysis - Assignment 2\\ [0.5ex] \begin{large} 2020K8009907032 \end{large}\\ [0.5ex] \begin{large} 唐嘉良 \end{large}}
+%\title{Assignment 1}
+\maketitle
+\tableofcontents
+
+
+\newpage
+\section{Problem One}
+A robber is planning to rob houses along a street. Each house has a certain amount of money 
+stashed, the only constraint stopping you from robbing each of them is that adjacent houses have 
+security system connected and it will automatically contact the police if two adjacent houses were 
+broken into on the same night. 
+
+
+1. Given a list of non-negative integers representing the amount of money of each house, 
+determine the maximum amount of money you can rob tonight without alerting the police. 
+
+
+2. What if all houses are arranged in a circle?
+\subsection{Algorithm Description}
+采用动态规划的方法。设dp[n]为从第1个房屋开始打劫到第n个房屋所获得的总收益，circle[n-1]为从第2个房屋开始打劫到第n个房屋所获得的总收益。
+对于问题1，分为是否抢劫第n个房屋给出dp的状态转移式。对于问题二，仍然分为是否抢劫第n个房屋给出状态转移式，但是必须同时给出dp和circle的状态转移式，并利用circle来求取dp[n-1]。
+\begin{algorithm}[htbp]
+  \caption{Money Robbing}  
+  \begin{algorithmic}[1] 
+    \Function {MaxMoney}{$money,  n$} 
+	\State dp[n],circle[n];
+  \State dp[0] = money[0];
+  \State dp[1] = max(money[0],money[1]);
+  \State circle[0] = 0;
+  \State circle[1] = money[1];
+  \State circle[2] = max(money[1],money[2]);
+	%\State highA = n-1, highB = n-1; 
+    % \State midA = baseA[(lowA + highA) / 2], midB = baseB[(lowB + highB) / 2]
+	% \While {highA != lowA}
+  %     \State medianA = baseA[(highA + lowA)/2];  
+  %     \State medianB = baseB[(highB + lowB)/2];  
+	\If {n == 1}  
+	 \State return money[0];
+  \EndIf 
+  \If {n == 2}  
+	 \State return max(money[0],money[1]);
+  \EndIf
+	%\EndWhile
+  \State //If houses are in a circle, do this 'for' to compute circle[]
+  \For{$i=3$ to $n$}
+  \State circle[i] = max(circle[i-1],circle[i-2]+money[i]);
+  \EndFor
+  
+  \For{$i=2$ to $n-1$}
+  \State dp[i] = max(dp[i-1],dp[i-2]+money[i]);
+  \State //if in a circle, do this sentence instead of the front one
+  \State dp[i] = max(dp[i-1],circle[i-2]+money[i]);
+  \EndFor
+
+  \State return dp[n-1];
+    \EndFunction 
+  \end{algorithmic}  
+\end{algorithm} 
+\newpage
+\subsection{the optimal substructure and DP equation}
+最优子结构是偷取前n-1个房屋和偷取前n-2个房屋的最大收益。因为偷n个房屋的最大收益可以分为两种情况：偷第n个，那么最优子结构是偷前n-2个；不偷第n个，那么最优子结构是偷前n-1个。
+动态规划的状态转移方程为dp[i] = max(dp[i-1],dp[i-2]+money[i]);
+
+
+如果房屋呈环形，那么先利用同样的状态转移方程计算从第二个房屋开始偷的最大收益，
+再利用计算出的最大收益计算总最大收益，状态转移方程为dp[i] = max(dp[i-1],circle[i-2]+money[i]);
+% \begin{figure}[H]
+% \centering
+%\includegraphics[width=18cm,height=8cm]{1.jpg}
+%\caption{Subproblem reduction graph in problem one} 
+%\end{figure}
+\subsection{the correctness of the algorithm}
+正确性的说明是简单的。对于只有一个或两个房子的情况，显然无论是否环形都是偷最有钱的那一家。
+对于大于等于3个房子的情况，考虑最后一个房子是否偷，如果偷，那么倒数第二个房子不能被偷，而前n-2个房子则是自由偷，
+是最优子结构，用最后一个房子的收益加上前n-2个房子的最大收益即可。
+
+
+对于环形的情况，同样考虑最后一个房子是否被偷，与线性排列唯一的不同点是如果最后一个房子被偷，
+那么第一个房子不能被偷，第二个到第n-2个房子是自由偷取的。于是先计算一个排除第一个房子之后的最大收益数组circle，
+替换线性情况的dp[n-2]即可。
+\subsection{the complexity of the algorithm}
+由于线性的计算方式，只需要扫一遍数组即可得到答案，无论环形还是线性排列，时间复杂度都为 T(n) = O(n).
+
+
+最多只需要两个长度为n的数组，空间复杂度为 S(n) = O(n).
+
+
+
+
+
+\newpage
+\section{Problem Two}
+An ugly number is a positive integer whose prime factors are limited to 2, 3, and 5.
+
+
+Given an integer n, return the nth ugly number.
+\subsection{Algorithm Description}
+本题思路是：第n个数肯定是前n-1个数中某个数的2倍或3倍或5倍，维护三个指针搜寻前n-1个数中自身2/3/5倍恰好大于第n-1个数的数即可。且下一次搜寻的时候接着上次搜寻的指针位置进行搜寻即可，减免时间开销。
+
+\begin{algorithm}[htbp]  
+  \caption{Ugly Number}  
+  \begin{algorithmic}[1] 
+   \Function {the nth ugly number}{$n$} 	
+   \State uglynum[n];
+   \State point2=0,point3=0,point5=0;
+   \State uglynum[0] = 1;
+   \State uglynum[n];
+   \If {n == 1}  
+	 \State return 1;
+  \EndIf 
+  \For{$i=1$ to $n-1$}
+  \While {uglynum[point2]*2 <= uglynum[i-1]}
+  \State point2++;
+  \EndWhile 
+  \While {uglynum[point3]*3 <= uglynum[i-1]}
+  \State point3++;
+  \EndWhile
+  \While {uglynum[point5]*5 <= uglynum[i-1]}
+  \State point5++;
+  \EndWhile 
+	 %\State return 1;
+  \State uglynum[i] = min(uglynum[point2],uglynum[point3],uglynum[point5]);
+  % \State //if in a circle, do this sentence instead of the front one
+  % \State dp[i] = max(dp[i-1],circle[i-2]+money[i]);
+  \EndFor
+    \EndFunction  
+  \end{algorithmic}  
+\end{algorithm} 
+\newpage
+\subsection{the optimal substructure and DP equation}
+最优子结构是前n-1个丑数，因为第n个丑数一定是前n-1个丑数的某一个的2或3或5倍。动态规划的状态转移方程为uglynum[i] = min(uglynum[point2],uglynum[point3],uglynum[point5])。
+\subsection{the correctness of the algorithm}
+正确性是容易说明的。首先，第n个丑数由于只能是2、3、5的倍数，他要么是2、3、5，要么除以2或3或5之后仍然是只是2、3、5的倍数，这个数仍然是丑数，将1视作第一个丑数，我们得到：第n个丑数一定是前n-1个丑数的某一个的2或3或5倍。
+
+
+因为第n个丑数肯定比第n-1个丑数大，而且按序寻找，那么三大指针目的在于寻找之前丑数的2、3、5倍的数中比第n-1个丑数大的最小的那个，只有这三个有可能是第n个丑数。
+\subsection{the complexity of the algorithm}
+三大指针均最多需要扫一遍长度为n的数组，因此时间复杂度为T(n) = O(n).
+只需要开一个数组存储计算出来的丑数，空间复杂度为S(n) = O(n).
+
+
+
+
+
+\newpage
+\section{Problem Three}
+Given n, how many structurally unique BST’s (binary search trees) that store values 1...n?
+\subsection{Algorithm Description}
+考虑根节点的左右子树，两个二叉树同构当且仅当左右子树均同构，所以计算不同构的二叉树，仅需按节点数量分类，分别计算左右子树不同构的二叉树数目，相乘并按不同节点数量的情况进行累加即可。
+\begin{algorithm}[htbp]  
+  \caption{Unique Binery Search Trees}  
+  \begin{algorithmic}[1] 
+   \Function {UniqueBTNum}{$n$} 	
+   \State num[n];
+   \State num[0] = 1, num[1] = 1;
+    \If {$n == 0 || n==1$}  
+	 \State return 1; 
+      \EndIf
+      \For{$i=2$ to $n$}
+      \For{$j=0$ to $i-1$}
+      \State num[i] += num[j]*num[i-1-j];
+      \EndFor
+      \EndFor
+      \State return num[n]; 
+    \EndFunction  
+  \end{algorithmic}  
+\end{algorithm} 
+\newpage
+\subsection{the optimal substructure and DP equation}
+最优子结构是前面0到n-1个节点的不同构二叉树的数目，不同构的二叉树，仅需按节点数量分类，
+分别计算左右子树不同构的二叉树数目，相乘并按不同节点数量的情况进行累加即可。这个计算方法得到的答案正是卡特兰数！
+\subsection{the correctness of the algorithm}
+对于0个或1个结点的情况，很显然只有1种独特二叉搜索树。
+
+
+2个或以上节点情况下，两个二叉搜索树不同构等价于根节点左右子树之一不同构，所以对于左右子树根节点数目分类，计算不同结点数下不同构的左右子树的数量，根据组合数学的原理，对其相乘即为该节点数目情况下不同构二叉搜索树的数目，最后依节点数目情况累加即可。算法正确。
+\subsection{the complexity of the algorithm}
+需要双重循环计算num[n]，时间复杂度为T(n) = O($n^{2}$).
+只需要一个数组存储计算结果，空间复杂度为S(n) = O(n).
+
+
+进一步地，在发现该问题结果为卡特兰数之后，根据组合数学的知识，我们可以化简出卡特兰数的通项公式，以此代入n以进行不超过O(n)的计算（因为阶乘的计算只需要O(n)复杂度的乘除法），甚至无需写一个上面这样子的O($n^{2}$)的算法。
+在允许这种优化的情况下，T(n) 不超过 O(n)。
+\end{document}
