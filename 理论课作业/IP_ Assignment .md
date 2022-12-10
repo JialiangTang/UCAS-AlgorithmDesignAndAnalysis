@@ -12,7 +12,7 @@
 
 ### Problem1
 
-**Analysis**：Assume $x_{ij}=1$ means j-th job is assigned to i-th worker. Vice versa.
+**Analysis**：Assume $x_{ij}=1$ means j-th job is assigned to i-th worker. Vice versa. Considering workers can work at the same time(same time used, multiple jobs done). 也就是说考虑可以并行工作。
 
 then we have:  
 
@@ -160,7 +160,7 @@ $max \sum_{i=1}^{m}\sum_{j=1}^{n}{c_{ij}x_{ij}}$
 
 $s.t. \sum_{i=1}^{m}{x_{ij}} = 1$ for all $j$
 
-$\sum_{j=1}^{n}{x_{ij}} = 1$  for all $i$
+$\sum_{j=1}^{n}{x_{ij}} \le 1$  for all $i$
 
 $x_{ij} = 0/1$ for all $i$ and $j$
 
