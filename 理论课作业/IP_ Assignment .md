@@ -152,7 +152,7 @@ $x_{i} = 0/1$ for all $i$
 
 ### Problem 10
 
-**Analysis**：Assume $x_{ij}=1$ means j-th job is assigned to i-th worker. Vice versa. Assume that num of jobs is less than num of workers, and there are m workers and n jobs.  So m$\le$n.
+**Analysis**：Assume $x_{ij}=1$ means j-th job is assigned to i-th worker. Vice versa. Assume that num of jobs is less than num of workers, and there are m workers and n jobs.  So m$\le$n. Considering every job is assigned, but not every worker has job to do.
 
 then we have:  
 
