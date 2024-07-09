@@ -3,6 +3,7 @@
 #define MAX 1000000
 using namespace std;
 int n,a[MAX+1],l[MAX];
+
 int lis(){
 	l[0] = a[0];
 	int length = 1;
